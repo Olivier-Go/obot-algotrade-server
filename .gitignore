@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.idea/
+
+.env
+
+.DS_Store
+Thumbs.db
+
+yarn-error.log
