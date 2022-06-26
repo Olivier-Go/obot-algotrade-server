@@ -1,7 +1,6 @@
 import "./utils/env.js";
-import {drawOrdersArr, isEmptyObj, startTime, memoryUsage} from "./utils/functions.js";
-import {updateBuySellDiff, updateSellBuyDiff, updateBuySellOp, updateSellBuyOp} from "./opportunities.js";
-import {apiFetchConnection, apiAddOpportunity} from "./requests.js";
+import { startTime, memoryUsage, getOpportunity, setPriceData } from "./utils/functions.js";
+import { apiFetchConnection, apiSendOrder } from "./requests.js";
 import Datafeed from "./datafeed/Datafeed.js";
 import { state } from "./state.js";
 
@@ -11,7 +10,15 @@ export const app = {
     init: () => {
         state.startTime = Date.now();
         datafeedWs = new Datafeed();
-        datafeedWs.onMessage((data) => state.priceData = data);
+        datafeedWs.onMessage((data) => {
+            setPriceData(data);
+            const order = getOpportunity();
+            if (order) {
+                console.log(order);
+                process.exit();
+                //apiSendOrder(order);
+            }
+        });
         // setInterval(() => {
         //     state.resetTime += 1;
         // }, 1000);
@@ -25,24 +32,6 @@ export const app = {
         console.log(`----------------------------------------------------------------------------`);
     },
 
-    printBuySellDiff: () => {
-        console.log(`          DIFF  :   BUY ${process.env.EXCHANGE1} / SELL ${process.env.EXCHANGE2}                   `);
-        state.buySellDiff1To2 = updateBuySellDiff(exchange2Ws.sellOrders, exchange1Ws.buyOrders, state.orderSize);
-        console.table(drawOrdersArr(state.buySellDiff1To2.diff));
-        console.log(`          DIFF  :   BUY ${process.env.EXCHANGE2} / SELL ${process.env.EXCHANGE1}                   `);
-        state.buySellDiff2To1 = updateBuySellDiff(exchange1Ws.sellOrders, exchange2Ws.buyOrders, state.orderSize);
-        console.table(drawOrdersArr(state.buySellDiff2To1.diff));
-    },
-
-    printSellBuyDiff: () => {
-        console.log(`          DIFF  :   SELL ${process.env.EXCHANGE1} / BUY ${process.env.EXCHANGE2}                    `);
-        state.sellBuyDiff1To2 = updateSellBuyDiff(exchange2Ws.buyOrders, exchange1Ws.sellOrders, state.orderSize);
-        console.table(drawOrdersArr(state.sellBuyDiff1To2.diff));
-        console.log(`          DIFF  :   SELL ${process.env.EXCHANGE2}  / BUY ${process.env.EXCHANGE1}                   `);
-        state.sellBuyDiff2To1 = updateSellBuyDiff(exchange1Ws.buyOrders, exchange2Ws.sellOrders, state.orderSize);
-        console.table(drawOrdersArr(state.sellBuyDiff2To1.diff));
-    },
-
     // reset: () => {
     //     exchange1Ws.reset();
     //     exchange2Ws.reset();
@@ -53,13 +42,7 @@ export const app = {
         console.clear();
         //if (state.resetTime > 3600) app.reset(); // 1 heure
         app.printBanner();
-        console.log(state.priceData);
-        //exchange1Ws.printOrderBook();
-        //exchange2Ws.printOrderBook();
-        // app.printBuySellDiff();
-        // app.buySellOp(true, state.ticker);
-        // app.printSellBuyDiff();
-        // app.sellBuyOp(true, state.ticker);
+        console.log('priceData:', state.priceData);
     },
 
     start: async (apiState) => {
