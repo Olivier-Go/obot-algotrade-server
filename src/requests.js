@@ -3,7 +3,7 @@ import { app } from "./app.js";
 import { state } from "./state.js";
 import axios from "axios";
 
-export const apiFetchConnection = () => (
+export const apiFetchConnection = async () => (
     axios({
         method: 'post',
         url: `${process.env.API_URL}/api/login_check`,
@@ -14,9 +14,8 @@ export const apiFetchConnection = () => (
     })
         .then((response) => {
             state.apiToken = response.data.token;
-            apiFetchParameters();
-            app.init();
-            app.run();
+            // apiFetchParameters();
+
         })
         .catch((error) => {
             console.warn(`${error.code}: ${error.address}:${error.port}`);
@@ -25,25 +24,25 @@ export const apiFetchConnection = () => (
         })
 );
 
-const apiFetchParameters = () => (
-    axios({
-        method: 'get',
-        url: `${process.env.API_URL}/api/parameters`,
-        headers: {'Authorization': `Bearer ${state.apiToken}`},
-    })
-        .then((response) => {
-            console.log(response.data);
-            if (response.status === 200) {
-                state.orderDiff = response.data.worker_order_diff;
-                state.orderSize = response.data.worker_order_size;
-            }
-        })
-        .catch((error) => {
-            console.warn(`${error.code}: ${error.address}:${error.port}`);
-        })
-        .finally(() => {
-        })
-);
+// const apiFetchParameters = () => (
+//     axios({
+//         method: 'get',
+//         url: `${process.env.API_URL}/api/parameters`,
+//         headers: {'Authorization': `Bearer ${state.apiToken}`},
+//     })
+//         .then((response) => {
+//             console.log(response.data);
+//             if (response.status === 200) {
+//                 state.orderDiff = response.data.worker_order_diff;
+//                 state.orderSize = response.data.worker_order_size;
+//             }
+//         })
+//         .catch((error) => {
+//             console.warn(`${error.code}: ${error.address}:${error.port}`);
+//         })
+//         .finally(() => {
+//         })
+// );
 
 export const apiAddOpportunity = (op) => {
     if (!state.apiBusy) {

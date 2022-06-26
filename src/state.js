@@ -1,15 +1,13 @@
 import "./utils/env.js";
 
 export const state = {
-    ticker: process.env.TICKER,
     interval: null,
     startTime: 0,
-    resetTime: 0,
+    //resetTime: 0,
     apiToken: null,
     apiBusy: false,
     threshold: process.env.APP_THRESHOLD,
-    orderSize: process.env.ORDER_SIZE,
-    orderDiff: process.env.ORDER_DIFF,
+    priceData: {},
     buySellDiff1To2: {},
     buySellDiff2To1: {},
     buySellOp1To2: {
